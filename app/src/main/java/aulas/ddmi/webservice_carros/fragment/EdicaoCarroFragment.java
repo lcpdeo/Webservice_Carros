@@ -24,7 +24,6 @@ import java.io.IOException;
 import aulas.ddmi.webservice_carros.R;
 import aulas.ddmi.webservice_carros.activity.CarroActivity;
 import aulas.ddmi.webservice_carros.model.Carro;
-import aulas.ddmi.webservice_carros.service.CarroService;
 
 /**
  * Created by vagner on 15/05/16.
@@ -67,11 +66,11 @@ public class EdicaoCarroFragment extends BaseFragment {
 
         //carrega a imagem e controla o progressbar
         //carrega a imagem e controla o progressbar
-        Log.d(TAG, "URL foto = " + carro.urlFoto); //um log para depurar
+        Log.d(TAG, "URL foto = " + carro.getUrlFoto()); //um log para depurar
         imageViewFoto = (ImageView) view.findViewById(R.id.imv_card0_fredicaocarro);
-        if(carro.urlFoto != null){
+        if(carro.getUrlFoto() != null){
             progressBarCard0 = (ProgressBar) view.findViewById(R.id.pb_card0_fredicaocarro);
-            Picasso.with(getContext()).load(carro.urlFoto).fit().into(imageViewFoto, new Callback() {
+            Picasso.with(getContext()).load(carro.getUrlFoto()).fit().into(imageViewFoto, new Callback() {
                 @Override
                 public void onSuccess() {
                     progressBarCard0.setVisibility(View.GONE);
@@ -98,37 +97,37 @@ public class EdicaoCarroFragment extends BaseFragment {
         });
 
         //carrega o tipo nos RadioButtons
-        Log.d(TAG, "Tipo = " + carro.tipo); //um log para depurar
+        Log.d(TAG, "Tipo = " + carro.getTipo()); //um log para depurar
         rbClassicos = (RadioButton) view.findViewById(R.id.rbclassicos_card1_fredicaocarro);
         rbEsportivos = (RadioButton) view.findViewById(R.id.rbesportivos_card1_fredicaocarro);
         rbLuxo = (RadioButton) view.findViewById(R.id.rbluxo_card1_fredicaocarro);
-        if (carro.tipo.equals("classicos")) {
+        if (carro.getTipo().equals("classicos")) {
             rbClassicos.setChecked(true);
-        } else if (carro.tipo.equals("esportivos")) {
+        } else if (carro.getTipo().equals("esportivos")) {
             rbEsportivos.setChecked(true);
         } else {
             rbLuxo.setChecked(true);
         }
 
         //carrega o nome e a descrição
-        Log.d(TAG, "Nome = " + carro.nome + "\nDescrição = " + carro.desc); //um log para depurar
+        Log.d(TAG, "Nome = " + carro.getNome() + "\nDescrição = " + carro.getDesc()); //um log para depurar
         editTextNome = (EditText) view.findViewById(R.id.etNome_card2_fredicaocarro);
         editTextDescricao = (EditText) view.findViewById(R.id.etDescricao_card2_fredicaocarro);
-        editTextNome.setText(carro.nome);
-        editTextDescricao.setText(carro.desc);
+        editTextNome.setText(carro.getNome());
+        editTextDescricao.setText(carro.getDesc());
 
         //carrega a latitude e a longitude
-        Log.d(TAG, "Latitude = " + carro.latitude + "\nlongitude = " + carro.longitude); //um log para depurar
+        Log.d(TAG, "Latitude = " + carro.getLatitude() + "\nlongitude = " + carro.getLongitude()); //um log para depurar
         editTextLatitude = (EditText) view.findViewById(R.id.etlatitude_card3_fredicaocarro);
         editTextLongitude = (EditText) view.findViewById(R.id.etlongitude_card3_fredicaocarro);
-        editTextLatitude.setText(carro.latitude);
-        editTextLongitude.setText(carro.longitude);
+        editTextLatitude.setText(carro.getLatitude());
+        editTextLongitude.setText(carro.getLongitude());
 
         //carrega o vídeo
-        Log.d(TAG, "URL vídeo = " + carro.urlVideo); //um log para depurar
+        Log.d(TAG, "URL vídeo = " + carro.getUrlVideo()); //um log para depurar
         editTextUrlVideo = (EditText) view.findViewById(R.id.etURLVideo__card4_fredicaocarro);
-        if(carro.urlVideo != null){
-            editTextUrlVideo.setText(Uri.parse(carro.urlVideo).toString());
+        if(carro.getUrlVideo() != null){
+            editTextUrlVideo.setText(Uri.parse(carro.getUrlVideo()).toString());
         }
         editTextUrlVideo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,16 +161,16 @@ public class EdicaoCarroFragment extends BaseFragment {
         switch (item.getItemId()){
             case R.id.menuitem_salvar:{
                 //carrega os dados do formulário no objeto
-                carro.nome = editTextNome.getText().toString();
-                carro.desc = editTextDescricao.getText().toString();
-                carro.latitude = editTextLatitude.getText().toString();
-                carro.longitude = editTextLongitude.getText().toString();
+                carro.setNome(editTextNome.getText().toString());
+                carro.setDesc(editTextDescricao.getText().toString());
+                carro.setLatitude(editTextLatitude.getText().toString());
+                carro.setLongitude(editTextLongitude.getText().toString());
                 if(rbClassicos.isChecked()){
-                    carro.tipo = getContext().getResources().getString(R.string.tipo_classicos);
+                    carro.setTipo(getContext().getResources().getString(R.string.tipo_classicos));
                 }else if(rbEsportivos.isChecked()){
-                    carro.tipo = getContext().getResources().getString(R.string.tipo_esportivos);
+                    carro.setTipo(getContext().getResources().getString(R.string.tipo_esportivos));
                 }else {
-                    carro.tipo = getContext().getResources().getString(R.string.tipo_luxo);
+                    carro.setTipo(getContext().getResources().getString(R.string.tipo_luxo));
                 }
                 new CarrosTask().execute("put"); //executa a operação REST PUT em uma thread AsyncTask
                 break;
@@ -200,10 +199,10 @@ public class EdicaoCarroFragment extends BaseFragment {
             Log.d(TAG, "URI do arquivo: " + arquivoUri);
             if(arquivoUri.toString().contains("images")) {
                 imageViewFoto.setImageURI(arquivoUri); //coloca a imagem no ImageView
-                carro.urlFoto = arquivoUri.toString(); //armazena o Uri da imagem no objeto do modelo
+                carro.setUrlFoto(arquivoUri.toString()); //armazena o Uri da imagem no objeto do modelo
             }else if(arquivoUri.toString().contains("video")) {
                 //editTextUrlVideo.setText(arquivoUri.toString()); //coloca a URL do vídeo no EditText
-                carro.urlVideo = arquivoUri.toString(); //armazena o Uri do vídeo no objeto do modelo
+                carro.setUrlVideo(arquivoUri.toString()); //armazena o Uri do vídeo no objeto do modelo
             }
         }
     }
@@ -221,7 +220,7 @@ public class EdicaoCarroFragment extends BaseFragment {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            //executa a tarefa em background, em uma thread exclusiva para esta tarefa.
+            /*//executa a tarefa em background, em uma thread exclusiva para esta tarefa.
             if(params[0].equals("put")){
                 try {
                     return CarroService.put("/carros", carro); //URL_BASE
@@ -231,12 +230,12 @@ public class EdicaoCarroFragment extends BaseFragment {
             }else{
                 if(params[0].equals("delete")){
                     try {
-                        return CarroService.delete("/carros/" + carro.id); //URL_BASE + /carros/id
+                        return CarroService.delete("/carros/" + carro.getId()); //URL_BASE + /carros/id
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-            }
+            }*/
 
             return false;
         }

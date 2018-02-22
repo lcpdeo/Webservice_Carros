@@ -4,22 +4,89 @@ package aulas.ddmi.webservice_carros.model;
  * Created by vagner on 15/05/16.
  */
 
-import android.graphics.Bitmap;
-import android.os.Parcelable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)  //ignora atributos não previstos nesta classe (mas contidos no servidor)
 public class Carro implements Serializable {
     private static final long serialVersionUID = 6601006766832473959L;
 
-    public Long id;
-    public String nome;
-    public String desc;
-    public String tipo;
-    public String urlFoto;
-    public String urlVideo;
-    public String latitude;
-    public String longitude;
+    private Long id;
+    private String nome;
+    private String desc;
+    private String tipo;
+    private String urlFoto;
+    private String urlVideo;
+    private String latitude;
+    private String longitude;
+
+    public Carro() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getUrlFoto() {
+        return urlFoto;
+    }
+
+    public void setUrlFoto(String urlFoto) {
+        this.urlFoto = urlFoto;
+    }
+
+    public String getUrlVideo() {
+        return urlVideo;
+    }
+
+    public void setUrlVideo(String urlVideo) {
+        this.urlVideo = urlVideo;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
 
     @Override
     public String toString() {

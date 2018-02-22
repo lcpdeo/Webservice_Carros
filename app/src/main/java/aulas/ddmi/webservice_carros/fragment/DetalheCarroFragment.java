@@ -75,11 +75,11 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
         Log.d(TAG, "Dados do registro = " + carro);
 
         //carrega a imagem e controla o progressbar
-        Log.d(TAG, "URL foto = " + carro.urlFoto); //um log para depurar
+        Log.d(TAG, "URL foto = " + carro.getUrlFoto()); //um log para depurar
         imageView = (ImageView) view.findViewById(R.id.imv_card0_frdetalhecarro);
-        if(carro.urlFoto != null){
+        if(carro.getUrlFoto() != null){
             progressBarCard0 = (ProgressBar) view.findViewById(R.id.pb_card0_frdetalhecarro);
-            Picasso.with(getContext()).load(carro.urlFoto).fit().into(imageView, new Callback() {
+            Picasso.with(getContext()).load(carro.getUrlFoto()).fit().into(imageView, new Callback() {
                 @Override
                 public void onSuccess() {
                     progressBarCard0.setVisibility(View.GONE);
@@ -96,31 +96,31 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
 
 
         //carrega o tipo nos RadioButtons
-        Log.d(TAG, "Tipo = " + carro.tipo); //um log para depurar
+        Log.d(TAG, "Tipo = " + carro.getTipo()); //um log para depurar
         rbClassicos = (RadioButton) view.findViewById(R.id.rbclassicos_card1_detalhecarro);
         rbEsportivos = (RadioButton) view.findViewById(R.id.rbespotivos_card1_detalhecarro);
         rbLuxo = (RadioButton) view.findViewById(R.id.rbluxo_card1_detalhecarro);
-        if (carro.tipo.equals(getContext().getResources().getString(R.string.tipo_classicos))) {
+        if (carro.getTipo().equals(getContext().getResources().getString(R.string.tipo_classicos))) {
             rbClassicos.setChecked(true);
-        } else if (carro.tipo.equals(getContext().getResources().getString(R.string.tipo_esportivos))) {
+        } else if (carro.getTipo().equals(getContext().getResources().getString(R.string.tipo_esportivos))) {
             rbEsportivos.setChecked(true);
         } else {
             rbLuxo.setChecked(true);
         }
 
         //carrega o nome e a descrição
-        Log.d(TAG, "Nome = " + carro.nome + "\nDescrição = " + carro.desc); //um log para depurar
+        Log.d(TAG, "Nome = " + carro.getNome() + "\nDescrição = " + carro.getDesc()); //um log para depurar
         textViewNome = (TextView) view.findViewById(R.id.tvNome_card0_frdetalhecarro);
         textViewDescricao = (TextView) view.findViewById(R.id.tvDescricao_card2_frdetalhecarro);
-        textViewNome.setText(carro.nome);
-        textViewDescricao.setText(carro.desc);
+        textViewNome.setText(carro.getNome());
+        textViewDescricao.setText(carro.getDesc());
 
         //carrega a latitude e a longitude
         textViewLatitude = (TextView) view.findViewById(R.id.tvLatitude_card2_frdetalhecarro);
         textViewLongitude = (TextView) view.findViewById(R.id.tvLongitude_card2_frdetalhecarro);
-        textViewLatitude.setText(carro.latitude);
-        textViewLongitude.setText(carro.longitude);
-        Log.d(TAG, "Latitude = " + carro.latitude + "\nlongitude = " + carro.longitude); //um log para depurar
+        textViewLatitude.setText(carro.getLatitude());
+        textViewLongitude.setText(carro.getLongitude());
+        Log.d(TAG, "Latitude = " + carro.getLatitude() + "\nlongitude = " + carro.getLongitude()); //um log para depurar
         // Mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         // Inicia o Google Maps dentro do fragment
@@ -128,17 +128,17 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
 
         //carrega  o video
         //Só suporta os formatos aceitos nativamente pelo Android
-        Log.d(TAG, "URL Vídeo = " + carro.urlVideo); //um log para depurar
+        Log.d(TAG, "URL Vídeo = " + carro.getUrlVideo()); //um log para depurar
         videoView = (VideoView) view.findViewById(R.id.videoView_card4_frdetalhecarro);
         progressBarCard4 = (ProgressBar) view.findViewById(R.id.pb_card4_fredetalhecarro);
         final ImageView imageViewPlayVideo = (ImageView) view.findViewById(R.id.imageView_card4_fradetalhecarro);
         imageViewPlayVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(carro.urlVideo != null){
+                if(carro.getUrlVideo() != null){
                     imageViewPlayVideo.setVisibility(View.INVISIBLE);
                     videoView.setMediaController(new MediaController(getContext()));
-                    videoView.setVideoURI(Uri.parse(carro.urlVideo));
+                    videoView.setVideoURI(Uri.parse(carro.getUrlVideo()));
                     videoView.start();
                 }else{
                     toast(R.string.msg_toast_naohavideo);
@@ -207,8 +207,8 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
 
 
             // parse das coordenadas de String para Double
-            double lat = Double.parseDouble(carro.latitude);
-            double lng = Double.parseDouble(carro.longitude);
+            double lat = Double.parseDouble(carro.getLatitude());
+            double lng = Double.parseDouble(carro.getLongitude());
 
             if (lat != 0 && lng != 0) {
                 LatLng location = new LatLng(lat, lng); // Cria o objeto LatLng com a coordenada da fábrica
@@ -220,7 +220,7 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
 
                 // Adiciona um marcador para o objeto location
                 googleMap.addMarker(new MarkerOptions()
-                        .title(carro.nome)
+                        .title(carro.getNome())
                         .snippet("Local de uma de suas fábricas.")
                         .position(location));
 
@@ -232,8 +232,8 @@ public class DetalheCarroFragment extends BaseFragment implements OnMapReadyCall
 
                 // Marcador no local da fábrica
                 googleMap.addMarker(new MarkerOptions()
-                        .title(carro.nome)
-                        .snippet(carro.desc)
+                        .title(carro.getNome())
+                        .snippet(carro.getDesc())
                         .position(location));
             }
 

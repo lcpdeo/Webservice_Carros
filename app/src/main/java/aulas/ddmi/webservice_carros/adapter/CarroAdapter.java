@@ -56,10 +56,10 @@ public class CarroAdapter extends RecyclerView.Adapter<CarroAdapter.CarrosViewHo
         // Atualiza a view
         Carro c = carros.get(position);
 
-        holder.tNome.setText(c.nome);
+        holder.tNome.setText(c.getNome());
         holder.progress.setVisibility(View.VISIBLE);
 
-        Picasso.with(context).load(c.urlFoto).fit().into(holder.img, new Callback() {
+        Picasso.with(context).load(c.getUrlFoto()).fit().into(holder.img, new Callback() {
             @Override
             public void onSuccess() {
                 holder.progress.setVisibility(View.GONE);

@@ -1,0 +1,34 @@
+package aulas.ddmi.webservice_carros.service;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
+/**
+ * Created by vagner on 22/02/18.
+ */
+
+public class RetrofitSetup {
+
+    private final Retrofit retrofit;
+
+    public RetrofitSetup() {
+        //para gerar um log mais elaborado
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(); //para gerar um log mais elaborado
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder client = new OkHttpClient.Builder(); //cria um cliente para o interceptor
+        client.addInterceptor(interceptor); //adiciona o interceptor no cliente
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.8:8080/api/rest/")
+                .addConverterFactory(JacksonConverterFactory.create()) //GsonConverterFactory.create()
+                .client(client.build()) //diz quem será o cliente no retrofit
+                .build();
+    }
+
+    //cria o serviço
+    public CarroService getCarroService(){
+        return retrofit.create(CarroService.class);
+    }
+}

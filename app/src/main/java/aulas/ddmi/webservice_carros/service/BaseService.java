@@ -5,5 +5,4 @@ package aulas.ddmi.webservice_carros.service;
  */
 public class BaseService {
     protected static final String TAG = "web_service_carros";
-    protected static final String URL_BASE = "http://192.168.1.80:8084/rest";
 }

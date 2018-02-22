@@ -17,12 +17,13 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import java.io.IOException;
-
 import aulas.ddmi.webservice_carros.R;
 import aulas.ddmi.webservice_carros.activity.CarroActivity;
 import aulas.ddmi.webservice_carros.model.Carro;
-import aulas.ddmi.webservice_carros.service.CarroService;
+import aulas.ddmi.webservice_carros.service.RetrofitSetup;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by vagner on 25/05/16.
@@ -118,19 +119,31 @@ public class NovoCarroFragment extends BaseFragment {
             case R.id.menuitem_salvar:{
                 //carrega os dados do formulário no objeto
                 if(!editTextNome.getText().toString().isEmpty()) {
-                    carro.id = 0L; //evita problemas com a conversão do GSON
-                    carro.nome = editTextNome.getText().toString();
-                    carro.desc = editTextDescricao.getText().toString();
-                    carro.latitude = editTextLatitude.getText().toString();
-                    carro.longitude = editTextLongitude.getText().toString();
+                    carro.setNome(editTextNome.getText().toString());
+                    carro.setDesc(editTextDescricao.getText().toString());
+                    carro.setLatitude(editTextLatitude.getText().toString());
+                    carro.setLongitude(editTextLongitude.getText().toString());
                     if(rbClassicos.isChecked()){
-                        carro.tipo = getContext().getResources().getString(R.string.tipo_classicos);
+                        carro.setTipo(getContext().getResources().getString(R.string.tipo_classicos));
                     }else if(rbEsportivos.isChecked()){
-                        carro.tipo = getContext().getResources().getString(R.string.tipo_esportivos);
+                        carro.setTipo(getContext().getResources().getString(R.string.tipo_esportivos));
                     }else {
-                        carro.tipo = getContext().getResources().getString(R.string.tipo_luxo);
+                        carro.setTipo(getContext().getResources().getString(R.string.tipo_luxo));
                     }
-                    new CarrosTask().execute(); //executa a operação REST POST em uma thread AsyncTask
+                    //new CarrosTask().execute(); //executa a operação REST POST em uma thread AsyncTask
+                    //Faz uma call com a operação POST para o servidor
+                    Call call = new RetrofitSetup().getCarroService().inserir(carro);
+                    call.enqueue(new Callback() { //executa em uma Thread separada da main
+                        @Override
+                        public void onResponse(Call call, Response response) {
+                            Log.i("tag", response.message());
+                        }
+
+                        @Override
+                        public void onFailure(Call call, Throwable t) {
+                            Log.i("tag", "Falha ao realizar a requisição POST.");
+                        }
+                    });
                 }else{
                     Toast.makeText(getContext(), getContext().getResources().getString(R.string.val_dadosinputs), Toast.LENGTH_SHORT).show();
                 }
@@ -156,10 +169,10 @@ public class NovoCarroFragment extends BaseFragment {
             Log.d(TAG, "URI do arquivo: " + arquivoUri);
             if(arquivoUri.toString().contains("images")) {
                 imageViewFoto.setImageURI(arquivoUri); //coloca a imagem no ImageView
-                carro.urlFoto = arquivoUri.toString(); //armazena o Uri para salvar a imagem no objeto imagem
+                carro.setUrlFoto(arquivoUri.toString()); //armazena o Uri para salvar a imagem no objeto imagem
             }else if(arquivoUri.toString().contains("video")) {
                 editTextUrlVideo.setText(arquivoUri.toString()); //coloca a URL do vídeo no EditText
-                carro.urlVideo = arquivoUri.toString(); //armazena o URL do vídeo no objeto do modelo
+                carro.setUrlVideo(arquivoUri.toString()); //armazena o URL do vídeo no objeto do modelo
             }
         }
     }
@@ -174,16 +187,16 @@ public class NovoCarroFragment extends BaseFragment {
         protected void onPreExecute() {
             super.onPreExecute();
             //emite uma caixa processando
-            showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
+            //showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
         }
 
         @Override
         protected Boolean doInBackground(String... params) {
-            try {
+            /*try {
                 return CarroService.post("/carros", carro); //URL_BASE + /carros
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
 
             return false;
 

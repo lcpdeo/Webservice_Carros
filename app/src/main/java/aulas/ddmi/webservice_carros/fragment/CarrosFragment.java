@@ -1,7 +1,6 @@
 package aulas.ddmi.webservice_carros.fragment;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +22,12 @@ import aulas.ddmi.webservice_carros.R;
 import aulas.ddmi.webservice_carros.activity.CarroActivity;
 import aulas.ddmi.webservice_carros.activity.CarrosActivity;
 import aulas.ddmi.webservice_carros.adapter.CarroAdapter;
+import aulas.ddmi.webservice_carros.dto.CarroSync;
 import aulas.ddmi.webservice_carros.model.Carro;
-import aulas.ddmi.webservice_carros.service.CarroService;
+import aulas.ddmi.webservice_carros.service.RetrofitSetup;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Este fragmento é responsável pelo conteúdo onde são listados os carros. A navegabilidade
@@ -93,6 +95,7 @@ public class CarrosFragment extends BaseFragment
         //associa um tipo de animação ao recyclerView.
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(new CarroAdapter(getContext(), new ArrayList<Carro>(), onClickCarro()));
 
         //configura o SwipeRefreshLayout
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swinperefrechlayout);
@@ -104,13 +107,61 @@ public class CarrosFragment extends BaseFragment
 
         //se houver conexão com a internet, wi-fi ou 3G ...
         if (isNetworkAvailable(getContext())) {
-            new CarrosTask().execute(); //executa a operação REST GET em uma thread AsyncTask
+            getCarrosNoServer();
+
         } else {
             alertOk(getContext(), R.string.title_conectividade, R.string.msg_conectividade);
         }
 
         return view;
 
+    }
+
+    /*
+        Este método utiliza o Retrofit para buscar os dados (em JSON) no servidor.
+        o evento onClick do item da lista.
+     */
+    private void getCarrosNoServer() {
+        //busca os carros em background, em uma thread exclusiva para esta tarefa, utilizando Retrofit.
+        if(CarrosFragment.this.tipo.equals(getString(R.string.tipo_todos))){ //se está no controlador (leia Fragment) da aba tipo todos.
+            Call<CarroSync> call = new RetrofitSetup().getCarroService().getCarros();
+            call.enqueue(new Callback<CarroSync>() {
+                @Override
+                public void onResponse(Call<CarroSync> call, Response<CarroSync> response) {
+                    CarroSync carroSync = response.body();
+                    //armazena os dados em um atributo de escopo global para utilizar na SearchView
+                    carros = carroSync.getCarros();
+                    //coloca a lista retornada pelo web service como fonte de dados do adaptador da RecyclerView
+                    recyclerView.setAdapter(new CarroAdapter(getContext(), carros, onClickCarro()));
+                    //faz com que a ProgressBar desapareça para o usuário
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onFailure(Call<CarroSync> call, Throwable t) {
+                    Log.e(TAG, t.getMessage());
+                }
+            });
+        }else { //se está no controlador (leia Fragment) de qq outra aba (onde o tipo é: clássicos, esportivos, ou luxo.
+            Call<CarroSync> call = new RetrofitSetup().getCarroService().getCarrosByTipo(CarrosFragment.this.tipo);
+            call.enqueue(new Callback<CarroSync>() {
+                @Override
+                public void onResponse(Call<CarroSync> call, Response<CarroSync> response) {
+                    CarroSync carroSync = response.body();
+                    //armazena os dados em um atributo de escopo global para utilizar na SearchView
+                    carros = carroSync.getCarros();
+                    //coloca a lista retornada pelo web service como fonte de dados do adaptador da RecyclerView
+                    recyclerView.setAdapter(new CarroAdapter(getContext(), carros, onClickCarro()));
+                    //faz com que a ProgressBar desapareça para o usuário
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onFailure(Call<CarroSync> call, Throwable t) {
+                    Log.e(TAG, t.getMessage());
+                }
+            });
+        }
     }
 
     /*
@@ -147,7 +198,7 @@ public class CarrosFragment extends BaseFragment
         //um for-eatch na lista de carros
         for(Carro carro : carros){
             //se o nome do carro começa com o texto digitado
-            if(carro.nome.contains(newText)) {
+            if(carro.getNome().contains(newText)) {
                 //adiciona o carro na nova lista
                 carroList.add(carro);
             }
@@ -158,63 +209,6 @@ public class CarrosFragment extends BaseFragment
         recyclerView.setAdapter(new CarroAdapter(getContext(), carroList, onClickCarro()));
 
         return true;
-    }
-
-    /*
-        Classe interna que extende uma AsyncTask.
-        Lembrando: A AsyncTask gerencia a thread que acessa os dados no web service.
-    */
-    private class CarrosTask extends AsyncTask<Void, Void, List<Carro>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //faz com que a ProgressBar apareça para o usuário
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Carro> doInBackground(Void... params) {
-            //busca os carros em background, em uma thread exclusiva para esta tarefa.
-            try {
-                if(CarrosFragment.this.tipo.equals(getString(R.string.tipo_todos))){
-                    return CarroService.getCarros("/carros");
-                }else if(CarrosFragment.this.tipo.equals(getString(R.string.tipo_classicos))){
-                    return CarroService.getCarros("/carros/tipo/" + CarrosFragment.this.tipo);
-                }else if(CarrosFragment.this.tipo.equals(getString(R.string.tipo_esportivos))){
-                    return CarroService.getCarros("/carros/tipo/" + CarrosFragment.this.tipo);
-                }
-                    return CarroService.getCarros("/carros/tipo/" + CarrosFragment.this.tipo);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d(TAG, "Exceção ao obter a lista de carros, método .doInBackground()");
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Carro> carros) {
-            super.onPostExecute(carros);
-            if (carros != null) {
-                Log.d(TAG, "Quantidade de carros no onPostExecute(): " + carros.size());
-                //atualiza a view na UIThread
-                //(Context, fonte de dados, tratador do evento onClick)
-                //coloca a lista retornada pelo web service como fonte de dados do adaptador da RecyclerView
-                recyclerView.setAdapter(new CarroAdapter(getContext(), carros, onClickCarro()));
-                //copia a lista de carros para uso no tratador do onClick
-                CarrosFragment.this.carros = carros;
-                //para a animação da swipeRefrech
-                swipeRefreshLayout.setRefreshing(false);
-                //faz com que a ProgressBar desapareça para o usuário
-                progressBar.setVisibility(View.INVISIBLE);
-            }else{
-                //faz com que a ProgressBar desapareça para o usuário
-                progressBar.setVisibility(View.INVISIBLE);
-                //avisa o usuário da falha no download
-                alertOk(getContext(), R.string.title_erro, R.string.msg_erro_falhanodownload); //faz aparecer o AlertDialog para o usuário
-            }
-        }
     }
 
     /*
@@ -241,6 +235,7 @@ public class CarrosFragment extends BaseFragment
             }
         };
     }
+
     /*
         Este método trata o evento onRefresh() do SwipeRefreshLayout.
         Ele acontece quando o usuário faz um swipe com o dedo para baixo na View.
@@ -250,7 +245,8 @@ public class CarrosFragment extends BaseFragment
             @Override
             public void onRefresh() {
                 if (isNetworkAvailable(getContext())) { //se houver conexão com a internet, wi-fi ou 3G ...
-                    new CarrosTask().execute(); //cria uma instância de AsyncTask
+                    //new CarrosTask().execute(); //cria uma instância de AsyncTask
+                    getCarrosNoServer();
                 } else {
                     alertOk(getContext(), R.string.title_conectividade, R.string.msg_conectividade);
                     recyclerView.setAdapter(new CarroAdapter(getContext(), new ArrayList<Carro>(), onClickCarro()));
