@@ -110,7 +110,7 @@ public class CarrosFragment extends BaseFragment
             getCarrosNoServer();
 
         } else {
-            alertOk(getContext(), R.string.title_conectividade, R.string.msg_conectividade);
+            alertOk(R.string.title_conectividade, R.string.msg_conectividade);
         }
 
         return view;
@@ -245,10 +245,9 @@ public class CarrosFragment extends BaseFragment
             @Override
             public void onRefresh() {
                 if (isNetworkAvailable(getContext())) { //se houver conexão com a internet, wi-fi ou 3G ...
-                    //new CarrosTask().execute(); //cria uma instância de AsyncTask
                     getCarrosNoServer();
                 } else {
-                    alertOk(getContext(), R.string.title_conectividade, R.string.msg_conectividade);
+                    alertOk(R.string.title_conectividade, R.string.msg_conectividade);
                     recyclerView.setAdapter(new CarroAdapter(getContext(), new ArrayList<Carro>(), onClickCarro()));
                 }
 
