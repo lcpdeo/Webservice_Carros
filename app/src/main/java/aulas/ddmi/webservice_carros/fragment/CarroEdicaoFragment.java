@@ -28,7 +28,7 @@ import aulas.ddmi.webservice_carros.model.Carro;
 /**
  * Created by vagner on 15/05/16.
  */
-public class EdicaoCarroFragment extends BaseFragment {
+public class CarroEdicaoFragment extends BaseFragment {
 
     private Carro carro; //uma instância da classe Carro com escopo global para utilização em membros da classe
     //componentes <-> objeto carro
@@ -245,9 +245,7 @@ public class EdicaoCarroFragment extends BaseFragment {
             super.onPostExecute(aBoolean);
             if(aBoolean){
                 //faz aparecer uma caixa de diálogo confirmando a operação
-                alertOk(getContext(), R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
-                //volta para a lista de carros
-                getActivity().finish();
+                alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
             }
         }
     }//fim classe interna

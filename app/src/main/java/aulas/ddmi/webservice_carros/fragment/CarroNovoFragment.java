@@ -28,7 +28,7 @@ import retrofit2.Response;
 /**
  * Created by vagner on 25/05/16.
  */
-public class NovoCarroFragment extends BaseFragment {
+public class CarroNovoFragment extends BaseFragment {
 
     private final String TAG = "Webservice_Carros"; //TAG para o LogCat
     private Carro carro; //uma instância da classe Carro com escopo global para utilização em membros da classe
@@ -208,7 +208,7 @@ public class NovoCarroFragment extends BaseFragment {
             if(aBoolean){
                 dismissWait(); //fecha a caixa processando
                 //faz aparecer uma caixa de diálogo confirmando a operação
-                alertOk(getContext(), R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
+                alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
                 //volta para a lista de carros
                 getActivity().finish();
             }
