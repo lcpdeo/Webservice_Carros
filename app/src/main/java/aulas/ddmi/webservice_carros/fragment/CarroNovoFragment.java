@@ -2,7 +2,6 @@ package aulas.ddmi.webservice_carros.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +29,6 @@ import retrofit2.Response;
  */
 public class CarroNovoFragment extends BaseFragment {
 
-    private final String TAG = "Webservice_Carros"; //TAG para o LogCat
     private Carro carro; //uma instância da classe Carro com escopo global para utilização em membros da classe
     private ProgressBar progressBarImg;  //uma progressbar para informar o processamento REST
     //componentes <-> objeto carro
@@ -130,13 +128,18 @@ public class CarroNovoFragment extends BaseFragment {
                     }else {
                         carro.setTipo(getContext().getResources().getString(R.string.tipo_luxo));
                     }
-                    //new CarrosTask().execute(); //executa a operação REST POST em uma thread AsyncTask
+                    //emite uma caixa de diálogo de processando
+                    showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
                     //Faz uma call com a operação POST para o servidor
                     Call call = new RetrofitSetup().getCarroService().inserir(carro);
                     call.enqueue(new Callback() { //executa em uma Thread separada da main
                         @Override
                         public void onResponse(Call call, Response response) {
                             Log.i("tag", response.message());
+                            //retira a caixa de diálogo de processando
+                            dismissWait();
+                            //faz aparecer uma caixa de diálogo confirmando a operação
+                            alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
                         }
 
                         @Override
@@ -176,43 +179,5 @@ public class CarroNovoFragment extends BaseFragment {
             }
         }
     }
-
-    /*
-        Classe interna que extende uma AsyncTask.
-        Lembrando: A AsyncTask gerência a thread que acessa os dados no web service.
-    */
-    private class CarrosTask extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //emite uma caixa processando
-            //showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            /*try {
-                return CarroService.post("/carros", carro); //URL_BASE + /carros
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-
-            return false;
-
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            if(aBoolean){
-                dismissWait(); //fecha a caixa processando
-                //faz aparecer uma caixa de diálogo confirmando a operação
-                alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
-                //volta para a lista de carros
-                getActivity().finish();
-            }
-        }
-    }//fim classe interna
 
 }//fim classe

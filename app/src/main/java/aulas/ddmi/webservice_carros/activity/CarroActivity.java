@@ -24,18 +24,20 @@ public class CarroActivity extends BaseActivity {
 
         //obtém do extras da intent recebida o fragmento que ela deve abrir
         String msg = (String) getIntent().getCharSequenceExtra("qualFragmentAbrir");
+        Log.d(TAG, "Qual fragment abrir? " + msg);
         if(msg.equals("CarroNovoFragment")){
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CarroNovoFragment()).commit();
-        }else if(msg.equals("CarroDetalheFragment")){
+        }else if(msg.equals("DetalheCarroFragment")){
+            Log.d(TAG, "Entrou no else");
             //constrói uma instância do Fragment CarroDetalheFragment
             CarroDetalheFragment carroDetalheFragment = new CarroDetalheFragment();
-            //insere o fragmento como conteúdo de content_main.xml
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, carroDetalheFragment).commit();
             //obtém o carro que foi repassado pela CarrosActivity ao chamar esta Activity
             Carro carro = (Carro) getIntent().getSerializableExtra("carro");
             Log.d(TAG, "Objeto carro recebido em CarroActivity: " + carro.toString()); //um log para o LogCat
             //repassa o objeto carro para o fragmento
             carroDetalheFragment.setCarro(carro);
+            //insere o fragmento como conteúdo de content_main.xml
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, carroDetalheFragment).commit();
         }
     }
 }

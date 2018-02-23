@@ -74,9 +74,9 @@ public class CarroDetalheFragment extends BaseFragment implements OnMapReadyCall
         Log.d(TAG, "Dados do registro = " + carro);
 
         //carrega a imagem e controla o progressbar
-        Log.d(TAG, "URL foto = " + carro.getUrlFoto()); //um log para depurar
         imageView = (ImageView) view.findViewById(R.id.imv_card0_frdetalhecarro);
         if(carro.getUrlFoto() != null){
+            Log.d(TAG, "URL foto = " + carro.getUrlFoto()); //um log para depurar
             progressBarCard0 = (ProgressBar) view.findViewById(R.id.pb_card0_frdetalhecarro);
             Picasso.with(getContext()).load(carro.getUrlFoto()).fit().into(imageView, new Callback() {
                 @Override
@@ -86,7 +86,7 @@ public class CarroDetalheFragment extends BaseFragment implements OnMapReadyCall
 
                 @Override
                 public void onError() {
-                    progressBarCard0.setVisibility(View.GONE);
+                    progressBarCard0.setVisibility(View.VISIBLE);
                 }
             });
         }else{
@@ -127,13 +127,13 @@ public class CarroDetalheFragment extends BaseFragment implements OnMapReadyCall
 
         //carrega  o video
         //Só suporta os formatos aceitos nativamente pelo Android
-        Log.d(TAG, "URL Vídeo = " + carro.getUrlVideo()); //um log para depurar
         videoView = (VideoView) view.findViewById(R.id.videoView_card4_frdetalhecarro);
         progressBarCard4 = (ProgressBar) view.findViewById(R.id.pb_card4_fredetalhecarro);
         final ImageView imageViewPlayVideo = (ImageView) view.findViewById(R.id.imageView_card4_fradetalhecarro);
         imageViewPlayVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "URL Vídeo = " + carro.getUrlVideo()); //um log para depurar
                 if(carro.getUrlVideo() != null){
                     imageViewPlayVideo.setVisibility(View.INVISIBLE);
                     videoView.setMediaController(new MediaController(getContext()));
@@ -242,32 +242,5 @@ public class CarroDetalheFragment extends BaseFragment implements OnMapReadyCall
 
         }
     }
-
-    /*
-        AsyncTask para buscar a foto do carro no servidor
-     *//*
-    private class TaskImagem extends AsyncTask<Void, Void, Void>{
-
-        Bitmap img;
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                img = new HttpHelper().doGetBitmap(carro.urlFoto);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Log.d(TAG, "imagem buscada na URL = " + img);
-            imageView.setImageBitmap(img);
-            progressBarCard0.setVisibility(View.INVISIBLE);
-        }
-    }//fim AsyncTask*/
 
 }//fim carro

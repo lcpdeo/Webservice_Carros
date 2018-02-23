@@ -2,7 +2,6 @@ package aulas.ddmi.webservice_carros.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,11 +18,12 @@ import android.widget.RadioButton;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
-
 import aulas.ddmi.webservice_carros.R;
 import aulas.ddmi.webservice_carros.activity.CarroActivity;
 import aulas.ddmi.webservice_carros.model.Carro;
+import aulas.ddmi.webservice_carros.service.RetrofitSetup;
+import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * Created by vagner on 15/05/16.
@@ -41,7 +41,7 @@ public class CarroEdicaoFragment extends BaseFragment {
     private EditText editTextUrlVideo; //campo referente ao atributo url_video do objeto carro
     ProgressBar progressBarCard0; //progressBar do Card0, do container na imagem do carro
 
-    //utilizado pelo Fragment para repassar o objeto carro clicado na lista pelo user
+    //utilizado pelo fragment para redeber o objeto carro repassado pelo fragment chamador
     public void setCarro(Carro carro) {
         this.carro = carro;
     }
@@ -65,7 +65,6 @@ public class CarroEdicaoFragment extends BaseFragment {
         Log.d(TAG, "Dados do registro = " + carro);
 
         //carrega a imagem e controla o progressbar
-        //carrega a imagem e controla o progressbar
         Log.d(TAG, "URL foto = " + carro.getUrlFoto()); //um log para depurar
         imageViewFoto = (ImageView) view.findViewById(R.id.imv_card0_fredicaocarro);
         if(carro.getUrlFoto() != null){
@@ -78,11 +77,9 @@ public class CarroEdicaoFragment extends BaseFragment {
 
                 @Override
                 public void onError() {
-                    progressBarCard0.setVisibility(View.GONE);
+                    progressBarCard0.setVisibility(View.VISIBLE);
                 }
             });
-        }else{
-            imageViewFoto.setImageResource(R.drawable.car_background);
         }
         imageViewFoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,12 +98,16 @@ public class CarroEdicaoFragment extends BaseFragment {
         rbClassicos = (RadioButton) view.findViewById(R.id.rbclassicos_card1_fredicaocarro);
         rbEsportivos = (RadioButton) view.findViewById(R.id.rbesportivos_card1_fredicaocarro);
         rbLuxo = (RadioButton) view.findViewById(R.id.rbluxo_card1_fredicaocarro);
-        if (carro.getTipo().equals("classicos")) {
-            rbClassicos.setChecked(true);
-        } else if (carro.getTipo().equals("esportivos")) {
-            rbEsportivos.setChecked(true);
-        } else {
-            rbLuxo.setChecked(true);
+        switch (carro.getTipo()) {
+            case "classicos":
+                rbClassicos.setChecked(true);
+                break;
+            case "esportivos":
+                rbEsportivos.setChecked(true);
+                break;
+            default:
+                rbLuxo.setChecked(true);
+                break;
         }
 
         //carrega o nome e a descrição
@@ -172,11 +173,47 @@ public class CarroEdicaoFragment extends BaseFragment {
                 }else {
                     carro.setTipo(getContext().getResources().getString(R.string.tipo_luxo));
                 }
-                new CarrosTask().execute("put"); //executa a operação REST PUT em uma thread AsyncTask
+                //emite uma caixa de diálogo de processando
+                showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
+                //Faz uma call com a operação POST para o servidor
+                Call call = new RetrofitSetup().getCarroService().alterar(carro);
+                call.enqueue(new retrofit2.Callback() { //executa em uma Thread separada da main
+                    @Override
+                    public void onResponse(Call call, Response response) {
+                        Log.i("tag", response.message());
+                        //retira a caixa de diálogo de processando
+                        dismissWait();
+                        //faz aparecer uma caixa de diálogo confirmando a operação
+                        alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
+                    }
+
+                    @Override
+                    public void onFailure(Call call, Throwable t) {
+                        Log.i("tag", "Falha ao realizar a requisição POST.");
+                    }
+                });
                 break;
             }
             case R.id.menuitem_excluir:{
-                new CarrosTask().execute("delete"); //executa a operação REST DELETE em uma thread AsyncTask
+                //emite uma caixa de diálogo de processando
+                showWait(getContext(), R.string.app_name, R.string.progressdialog_wait);
+                //Faz uma call com a operação POST para o servidor
+                Call call = new RetrofitSetup().getCarroService().excluir(String.valueOf(carro.getId()));
+                call.enqueue(new retrofit2.Callback() { //executa em uma Thread separada da main
+                    @Override
+                    public void onResponse(Call call, Response response) {
+                        Log.i("tag", response.message());
+                        //retira a caixa de diálogo de processando
+                        dismissWait();
+                        //faz aparecer uma caixa de diálogo confirmando a operação
+                        alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
+                    }
+
+                    @Override
+                    public void onFailure(Call call, Throwable t) {
+                        Log.i("tag", "Falha ao realizar a requisição POST.");
+                    }
+                });
                 break;
             }
             case android.R.id.home:
@@ -206,48 +243,5 @@ public class CarroEdicaoFragment extends BaseFragment {
             }
         }
     }
-
-    /*
-        Classe interna que extende uma AsyncTask.
-        Lembrando: A AsyncTask gerência a thread que acessa os dados no web service.
-    */
-    private class CarrosTask extends AsyncTask<String, Void, Boolean>{
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            /*//executa a tarefa em background, em uma thread exclusiva para esta tarefa.
-            if(params[0].equals("put")){
-                try {
-                    return CarroService.put("/carros", carro); //URL_BASE
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }else{
-                if(params[0].equals("delete")){
-                    try {
-                        return CarroService.delete("/carros/" + carro.getId()); //URL_BASE + /carros/id
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }*/
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            if(aBoolean){
-                //faz aparecer uma caixa de diálogo confirmando a operação
-                alertOk(R.string.title_confirmacao, R.string.msg_realizadocomsucesso);
-            }
-        }
-    }//fim classe interna
 
 }//fim classe externa

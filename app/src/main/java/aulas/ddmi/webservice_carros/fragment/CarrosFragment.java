@@ -135,6 +135,8 @@ public class CarrosFragment extends BaseFragment
                     recyclerView.setAdapter(new CarroAdapter(getContext(), carros, onClickCarro()));
                     //faz com que a ProgressBar desapareça para o usuário
                     progressBar.setVisibility(View.INVISIBLE);
+                    //retira o swipeRefrech
+                    swipeRefreshLayout.setRefreshing(false);
                 }
 
                 @Override
@@ -154,6 +156,8 @@ public class CarrosFragment extends BaseFragment
                     recyclerView.setAdapter(new CarroAdapter(getContext(), carros, onClickCarro()));
                     //faz com que a ProgressBar desapareça para o usuário
                     progressBar.setVisibility(View.INVISIBLE);
+                    //retira o swipeRefrech
+                    swipeRefreshLayout.setRefreshing(false);
                 }
 
                 @Override
@@ -229,6 +233,7 @@ public class CarrosFragment extends BaseFragment
                 //insere um extra com a referência para o objeto Carro
                 intent.putExtra("carro", carro);
                 //indica para a outra Activity qual o fragmento deve abrir
+                Log.d(TAG, "onClickItem. Está chamando startActivity. Valor = DetalheCarroFragment");
                 intent.putExtra("qualFragmentAbrir", "DetalheCarroFragment");
                 //chama outra Activity
                 startActivity(intent);

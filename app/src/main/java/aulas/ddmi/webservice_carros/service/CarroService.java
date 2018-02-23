@@ -1,14 +1,13 @@
 package aulas.ddmi.webservice_carros.service;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
-
 import aulas.ddmi.webservice_carros.dto.CarroSync;
 import aulas.ddmi.webservice_carros.model.Carro;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -26,5 +25,11 @@ public interface CarroService {
     Call<CarroSync> getCarrosByTipo(@Path("tipo") String tipo);
 
     @POST("carros")
-    Call<Void> inserir(@Body Carro carro); //define a assinatura do método
+    Call<Void> inserir(@Body Carro carro);
+
+    @PUT ("carros")
+    Call<Void> alterar(@Body Carro carro);
+
+    @DELETE("carros/{id}")
+    Call<Void> excluir(@Path("id") String id);
 }
